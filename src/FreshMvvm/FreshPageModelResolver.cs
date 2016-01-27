@@ -50,17 +50,20 @@ namespace FreshMvvm
 
         private static Type GetPageType (Type viewType)
         {
-            var pageName = viewType.FullName;
-            if (pageName.EndsWith ("PageModel", StringComparison.Ordinal))
-                pageName = pageName.Replace ("PageModel", string.Empty);
-            else if (pageName.EndsWith ("ViewModel", StringComparison.Ordinal))
-                pageName = pageName.Replace ("ViewModel", string.Empty);
+            var viewTypeName = viewType.FullName;
+            if (viewTypeName.EndsWith ("PageModel", StringComparison.Ordinal))
+                viewTypeName = viewTypeName.Replace ("PageModel", string.Empty);
+            else if (viewTypeName.EndsWith ("ViewModel", StringComparison.Ordinal))
+                viewTypeName = viewTypeName.Replace ("ViewModel", string.Empty);
             else
                 return null;
 
             var viewAssemblyName = viewType.GetTypeInfo().Assembly.FullName;
-            var viewModelName = String.Format(CultureInfo.InvariantCulture, "{0}{1}, {2}", pageName, "Page", viewAssemblyName);
-            return Type.GetType(pageName);
+            var pageFullName = string.Format(CultureInfo.InvariantCulture, "{0}{1}, {2}", 
+                                             viewTypeName, 
+                                             "Page", 
+                                             viewAssemblyName);
+            return Type.GetType(pageFullName);
         }
     }
 }
