@@ -33,9 +33,10 @@ namespace FreshMvvm
 
         public static Page ResolvePageModel (Type type, object data, FreshBasePageModel pageModel)
         {
-            var pageType = GetPageType(type);
+            var name = GetPageTypeName(type);
+            var pageType = Type.GetType (name);
             if (pageType == null)
-                throw new Exception ("Page for " + type.FullName + " not found");
+                throw new Exception (name + " not found");
 
             var page = (Page)FreshIOC.Container.Resolve (pageType);
 
@@ -48,22 +49,11 @@ namespace FreshMvvm
             return page;
         }
 
-        private static Type GetPageType (Type viewType)
+        private static string GetPageTypeName (Type viewType)
         {
-            var viewTypeName = viewType.FullName;
-            if (viewTypeName.EndsWith ("PageModel", StringComparison.Ordinal))
-                viewTypeName = viewTypeName.Replace ("PageModel", string.Empty);
-            else if (viewTypeName.EndsWith ("ViewModel", StringComparison.Ordinal))
-                viewTypeName = viewTypeName.Replace ("ViewModel", string.Empty);
-            else
-                return null;
-
-            var viewAssemblyName = viewType.GetTypeInfo().Assembly.FullName;
-            var pageFullName = string.Format(CultureInfo.InvariantCulture, "{0}{1}, {2}", 
-                                             viewTypeName, 
-                                             "Page", 
-                                             viewAssemblyName);
-            return Type.GetType(pageFullName);
+            return viewType.AssemblyQualifiedName
+                           .Replace("PageModel", "Page")
+                           .Replace("ViewModel", "Page");
         }
     }
 }
