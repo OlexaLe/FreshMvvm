@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Globalization;
+using System.Reflection;
 using Xamarin.Forms;
 
 namespace FreshMvvm
@@ -31,10 +33,9 @@ namespace FreshMvvm
 
         public static Page ResolvePageModel (Type type, object data, FreshBasePageModel pageModel)
         {
-            var name = type.AssemblyQualifiedName.Replace ("Model", string.Empty);
-            var pageType = Type.GetType (name);
+            var pageType = GetPageType(type);
             if (pageType == null)
-                throw new Exception (name + " not found");
+                throw new Exception ("Page for " + type.FullName + " not found");
 
             var page = (Page)FreshIOC.Container.Resolve (pageType);
 
@@ -47,6 +48,20 @@ namespace FreshMvvm
             return page;
         }
 
+        private static Type GetPageType (Type viewType)
+        {
+            var pageName = viewType.FullName;
+            if (pageName.EndsWith ("PageModel", StringComparison.Ordinal))
+                pageName = pageName.Replace ("PageModel", string.Empty);
+            else if (pageName.EndsWith ("ViewModel", StringComparison.Ordinal))
+                pageName = pageName.Replace ("ViewModel", string.Empty);
+            else
+                return null;
+
+            var viewAssemblyName = viewType.GetTypeInfo().Assembly.FullName;
+            var viewModelName = String.Format(CultureInfo.InvariantCulture, "{0}{1}, {2}", pageName, "Page", viewAssemblyName);
+            return Type.GetType(pageName);
+        }
     }
 }
 
